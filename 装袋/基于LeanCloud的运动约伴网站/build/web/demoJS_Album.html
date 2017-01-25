@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>Album Test</title>
+        <script src="https://leancloud.cn/scripts/lib/av-0.5.1.min.js"></script>
+        <script src="//code.jquery.com/jquery-1.11.3.min.js"></script>
+        <script src="//code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+        <script>
+            AV.initialize("azf56eqig235hs3p2w2v39fupnnhjcqk5ehkm656rxg7hgqg", "lp0jfo98k2u8i3wrw4z63ttba21fz3e00lzye2lmoitui8yj");
+            var user = AV.User.current();
+            //sP_photoIdList，Array类型，存储内容为相册内的照片的所有ID
+
+            function Save_Photo(profilePhotoFileUpload) {
+                var user = AV.User.current();
+                if (user) {
+                    var fileUploadControl = $(profilePhotoFileUpload)[0];
+                    if (fileUploadControl.files.length > 0) {
+                        var file = fileUploadControl.files[0];
+                        var name = "photo.jpg";
+                        var avFile = new AV.File(name, file);
+                        avFile.save().then(function() {
+                            var photoDictionary = {};
+                            photoDictionary["fileId"] = avFile.id;
+                            photoDictionary["fileUrl"] = avFile.url();
+                            var query = new AV.Query(AV.User);
+                            query.get(user.id, {
+                                success: function(obj) {
+                                    var results = new Array();
+                                    if (obj.get("sP_photoIdList") === undefined) {
+                                        results[0] = photoDictionary;
+                                        user.set("sP_photoIdList", results);
+                                        user.save().then(function() {
+                                            alert("Photo save success!");
+                                        }, function(error) {
+                                            alert(error.message);
+                                        });
+                                    }
+                                    else {
+                                        results = obj.get("sP_photoIdList");
+                                        results[results.length] = photoDictionary;
+                                        user.set("sP_photoIdList", results);
+                                        user.save().then(function() {
+                                            alert("Photo save success!");
+                                        }, function(error) {
+                                            alert(error.message);
+                                        });
+                                    }
+                                },
+                                error: function(err) {
+                                    alert("Photo save error: " + err.message);
+                                }
+                            });
+                        },
+                                function(error) {
+                                    alert("Error in save to File: " + error.message);
+                                });
+                    }
+                }
+                else {
+                    alert("Error!");
+                }
+            }
+            
+            function Read_Photo_friend(friend_obj){
+                if (friend_obj) {
+                    var query = new AV.Query(AV.User);
+                    query.get(friend_obj.id, {
+                        success: function(arr) {
+                            var array = arr.get("sP_photoIdList");
+                            for (i = 0; i < array.length; i++) {
+                                var photo = AV.File.withURL(array[i]["fileId"], array[i]["fileUrl"]);
+                                window.open(photo.url());
+                                }
+                            },
+                        error: function(error) {
+                            alert(error.message);
+                        }
+                    });
+                }
+                else {
+                    alert("Error!");
+                }
+            }
+            
+            function Read_Photo_current(){
+                var user = AV.User.current();
+                if (user) {
+                    var query = new AV.Query(AV.User);
+                    query.get(user.id, {
+                        success: function(arr) {
+                            var array = arr.get("sP_photoIdList");
+                            for (i = 0; i < array.length; i++) {
+                                var photo = AV.File.withURL(array[i]["fileId"], array[i]["fileUrl"]);
+                                window.open(photo.url());
+                                }
+                            },
+                        error: function(error) {
+                            alert(error.message);
+                        }
+                    });
+                }
+                else {
+                    alert("Error!");
+                }
+            }
+            
+
+
+        </script>
+    </head>
+    <body>
+        <div>Album Test</div>
+        <input type="file" id="profilePhotoFileUpload"><br/>
+        <button onclick="Save_Photo('#profilePhotoFileUpload')">Save Photo</button><br/>
+        <button onclick="Read_Photo_current()">Show Photos</button><br/>
+    </body>
+</html>

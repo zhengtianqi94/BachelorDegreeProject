@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <!--yqc2ou6f1jj12ngm23j7al7w0fdwss50o6c7jfdx8f8q4y1w
+    88a825ch9s1m5q7wmigmzirx4mhx9wv4xtfh2mlcpwmjgu60
+    -->
+    <head>
+        <title>Test</title>
+        <script src="https://leancloud.cn/scripts/lib/av-0.5.1.min.js"></script>
+        <script>
+
+            function Edit_By_Parameter(name) {
+                //�����������Խ��в�ѯ�����޸�
+                AV.initialize("azf56eqig235hs3p2w2v39fupnnhjcqk5ehkm656rxg7hgqg", "lp0jfo98k2u8i3wrw4z63ttba21fz3e00lzye2lmoitui8yj");
+                var query = new AV.Query(AV.User);
+                query.equalTo("sP_userName", name);  // find all the women
+                query.first({
+                    success: function(result) {
+                        alert("Edited!");
+                        result.set('sP_sex', 'Male');
+                        result.save();
+                        result.set('sP_academy', 'Computer Science');
+                        result.save();
+                        result.set('sP_friendCount', 200);
+                        result.save();
+                        result.set('sP_userName', 'Zheng Tianqi');
+                        result.save();
+                        result.set('sP_sucessCount', 100);
+                        result.save();
+                        result.set('sP_school', 'Tongji University');
+                        result.save();
+                        result.set('sP_enterScYear', 5);
+                        result.save();
+                        result.set('sP_reportedCount', 150);
+                        result.save();
+                    },
+                    error: function(error) {
+                        alert(error.message);
+                    }
+                });
+            }
+
+            function ListTags() {
+                AV.initialize("yzzd9nlo3gx0ba1m9iej6jwooipwkxy2t2mkkocngh56fskv", "7ofc6ma5j32whp287vznjsfhbpfvlzicq7tg3xzoshm5ogga");
+                var user = AV.User.current();
+                if (user) {
+                    //alert(user.get("email"));
+                    var query = new AV.Query(AV.User);
+                    query.get(user.id, {
+                        success: function(arr) {
+                            var array = arr.get("sP_tagList").toString();
+                            var arrays = new Array();
+                            arrays = array.split(',');
+                            for(i=0; i<arrays.length; i++){
+                                alert(arrays[i]);
+                            }
+                            alert(array);
+                        },
+                        error: function(object, error) {
+                            alert(error.message);
+                        }
+                    });
+                }
+                else {
+                    alert("Error!");
+                }
+            }
+
+
+            function SaveTag(){
+                AV.initialize("azf56eqig235hs3p2w2v39fupnnhjcqk5ehkm656rxg7hgqg", "lp0jfo98k2u8i3wrw4z63ttba21fz3e00lzye2lmoitui8yj");
+                var user = AV.User.current();
+                if (user) {
+                    //alert("Edited!" + user.get("sP_academy"));
+                    var str = "1,2,3,4";
+                    var strs = new Array();
+                    strs = str.split(',');
+                    user.set('sP_tagList', strs);
+                    user.save();
+                }
+                else {
+                    alert("Error!");
+                }
+            }
+
+
+
+            function Register(name, pass, mail) {
+                AV.initialize("azf56eqig235hs3p2w2v39fupnnhjcqk5ehkm656rxg7hgqg", "lp0jfo98k2u8i3wrw4z63ttba21fz3e00lzye2lmoitui8yj");
+                var User = AV.Object.extend("User");
+                var user = new AV.User();
+                user.set("username", name);//�û���
+                user.set("password", pass);//����
+                user.set("email", mail);//����
+                user.set("sP_sex", "��");//�Ա�
+                user.set("sP_academy", "Example Academy");//רҵ
+                user.set("sP_friendCount", 0);//���Ѽ���Ĭ��0
+                user.set("sP_userName", "Example Name");//��ʵ����
+                user.set("sP_successCount", 0);//Լ��ɹ�����Ĭ��Ϊ0
+                user.set("sP_school", "Example School");//ѧУ
+                user.set("sP_enterScYear", 1);//��ѧʱ�䣬Ĭ��1�꣬�ɸ��
+                user.set("sP_reportedCount", 0);//���ٱ�����Ĭ��Ϊ0
+                user.signUp(null, {
+                    success: function(user) {
+                        alert("Success!");
+                    },
+                    error: function(user, error) {
+                        alert(error.message);
+                    }
+                });
+            }
+
+            function Login(name, pass) {
+                AV.initialize("azf56eqig235hs3p2w2v39fupnnhjcqk5ehkm656rxg7hgqg", "lp0jfo98k2u8i3wrw4z63ttba21fz3e00lzye2lmoitui8yj");
+                AV.User.logIn(name, pass, {
+                    success: function(result) {
+                        var object = result;//�û���Ϣ����result�У�����ֱ�ӵ���result.get()�����õ���Ҫ�����
+                        alert("Success");
+                    },
+                    error: function(user, error) {
+                        alert(error.message);
+                    }
+                });
+            }
+
+            function Change_Password(name, pass, newpass) {
+                AV.initialize("azf56eqig235hs3p2w2v39fupnnhjcqk5ehkm656rxg7hgqg", "lp0jfo98k2u8i3wrw4z63ttba21fz3e00lzye2lmoitui8yj");
+                var user = AV.User.current();
+                if (user) {
+                    console.log("test");
+                    user.updatePassword(pass, newpass, {
+                        success: function() {
+                            alert("Password chenged!" + user.get("username"));
+                        },
+                        error: function(err) {
+                            alert(err.message);
+                        }
+                    });
+                }
+                else{
+                    alert("Error!");
+                }
+            }
+
+            function Logout() {
+                AV.initialize("azf56eqig235hs3p2w2v39fupnnhjcqk5ehkm656rxg7hgqg", "lp0jfo98k2u8i3wrw4z63ttba21fz3e00lzye2lmoitui8yj");
+                AV.User.logOut();
+                alert("Logout");
+                var currentUser = AV.User.current();
+            }
+
+        </script>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body>
+        <div>TestPage</div>
+        <button onclick="Register('name1', 'pass1', 'abc@mail.com1')">Registration</button><br/>
+        <button onclick="Login('name1', '123456')">Login</button><br/>
+        <button onclick="Edit_By_Parameter('Zheng Tianqi')">Edit</button><br/>
+        <button onclick="Change_Password('name1', '123456', '123456')">Change Password</button><br/>
+        <button onclick="Logout()">Logout</button><br/>
+    </body>
+</html>

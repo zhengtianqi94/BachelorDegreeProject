@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>Read_Friend</title>
+        <script src="https://leancloud.cn/scripts/lib/av-0.5.1.min.js"></script>
+        <script>
+
+            AV.initialize("azf56eqig235hs3p2w2v39fupnnhjcqk5ehkm656rxg7hgqg", "lp0jfo98k2u8i3wrw4z63ttba21fz3e00lzye2lmoitui8yj");
+            var AddRequest = AV.Object.extend("AddRequest");
+
+            function Read_Friend() {
+                var academy;
+                var user = AV.User.current();
+                if (user) {
+                    var relation = user.relation("friends");
+                    relation.query().find({
+                        success: function(list) {
+//                            alert(list);
+                            var friend = new Array();
+                            for (i = 0; i < list.length; i++) {
+                                friend[i] = list[i];
+//                                debugger;
+                                List_Friend_sportList(friend[i]);//��ȡ�˶��б�
+                                Read_Friend_Info(friend[i]);//��ȡ������Ա�
+                                Read_Friend_Academy(friend[i]);//��ȡѧУ
+                                Read_Friend_Campus(friend[i]);//��ȡУ��
+                                List_Friend_Tags(friend[i]);//��ȡ��ǩ
+
+                            }
+                        },
+                        error: function(error) {
+                            alert(error.message);
+                        }
+                    });
+                }
+                else {
+                    alert("Error!");
+                }
+            }
+
+            function Read_Friend_Info(Friend) {
+                alert(Friend.get("sP_userName") + " " + Friend.get("sP_sex"));
+            }
+            function Read_Friend_Academy(Friend) {
+                var Academy = AV.Object.extend("Academy");
+                var query = new AV.Query(Academy);
+                query.get(Friend.get("sP_academy").id, {
+                    success: function(result) {
+                        alert(result.get("school"));
+                    },
+                    error: function(error) {
+                        alert(error.message);
+                    }
+                });
+            }
+
+            function Read_Friend_Campus(Friend) {
+                var Campus = AV.Object.extend("Campus");
+                var query = new AV.Query(Campus);
+                query.get(Friend.get("sP_campus").id, {
+                    success: function(result) {
+                        alert(result.get("campus"));
+                    },
+                    error: function(error) {
+                        alert(error.message);
+                    }
+                });
+            }
+
+            function List_Friend_Tags(Friend) {
+                if (Friend.get("sP_tagList") !== undefined) {
+                    var array_1 = Friend.get("sP_tagList").toString();
+                    var arrays = new Array();
+                    arrays = array_1.split(',');
+                    alert(arrays);
+                }
+                else {
+                    alert("No Tag!");
+                }
+            }
+
+            function List_Friend_sportList(Friend) {
+                var Type_List = new Array();
+                var Level_List = new Array();
+                var Sport_Name = ['ƹ����', '��ë��', '����', '����', '�ܲ�', '����', '����'];
+                var Sport_ID = [1, 7, 6, 5, 4, 3, 2];
+                var array = Friend.get("sP_sportList");
+                if (array !== undefined) {
+                    for (k = 0; k < array.length; k++) {
+                        for (j = 0; j < Sport_ID.length; j++) {
+                            if (Sport_ID[j] === array[k]["sportType"]) {
+                                Type_List[k] = Sport_Name[j];
+                            }
+                        }
+                        Level_List[k] = array[k]["sportLevel"];
+                    }
+                    alert(Type_List);
+                    alert(Level_List);
+                }
+                else {
+                    alert("No Sport!");
+                }
+            }
+
+            function Remove_Friend(Friend_name) {
+                var user = AV.User.current();
+                if (user) {
+                    var relation = user.relation("friends");
+                    relation.query().find({
+                        success: function(list) {
+                            if (list.length === 0) {
+                                alert("You have no friend!");
+                            }
+                            else {
+                                for (i = 0; i < list.length; i++) {
+                                    if (list[i].get("username") === Friend_name) {
+                                        relation.remove(list[i]);
+                                        user.save();
+                                        alert("Friend " + Friend_name + " removed");
+                                    }
+                                }
+                            }
+                        },
+                        error: function(error) {
+                            alert(error.message);
+                        }
+                    });
+                }
+                else {
+                    alert("Error!");
+                }
+            }
+
+            function Show_Request_List() {
+                var user = AV.User.current();
+                if (user) {
+                    var query = new AV.Query(AddRequest);
+                    query.equalTo("toUser", user);
+                    query.find({
+                        success: function(results) {
+                            for (i = 0; i < results.length; i++) {
+                                alert(results[i].get("fromUser").id);
+                            }
+                        },
+                        error: function(error) {
+                            alert("Error" + " " + error.code + " " + error.message);
+                        }
+                    });
+                }
+                else {
+                    alert("Error in Show_Request_List!");
+                }
+            }
+
+            function CreateAddRequestto(Friend_name) {
+                var user = AV.User.current();
+                if (user) {
+                    var query = new AV.Query(AV.User);
+                    query.equalTo("sP_userName", Friend_name);
+                    query.first({
+                        success: function(object) {
+                            AV.Cloud.run('tryCreateAddRequest', {fromUserId: user.id, toUserId: object.id}, {
+                                success: function(data) {
+                                    alert(data);
+                                },
+                                error: function(err) {
+                                    alert("Inside: " + err.message);
+                                }
+                            });
+                        },
+                        error: function(error) {
+                            alert(error.message);
+                        }
+                    });
+                }
+                else {
+                    alert("Error!");
+                }
+            }
+
+            function agreeAddRequestfrom(Friend_name) {
+                var user = AV.User.current();
+                if (user) {
+                    var object_1;
+                    var query = new AV.Query(AV.User);
+                    query.equalTo("sP_userName", Friend_name);
+                    query.first({
+                        success: function(object) {
+                            object_1 = object;
+//                            alert(object_1.id + " " + object);
+                            var query_inside = new AV.Query(AddRequest);
+                            query_inside.equalTo("fromUser", object_1);
+                            query_inside.find({
+                                success: function(result) {
+                                    for (i = 0; i < result.length; i++) {
+                                        alert(result[i].get("status"));
+                                        if (result[i].get("status") === 0) {
+                                            AV.Cloud.run('agreeAddRequest', {objectId: result[i].id}, {
+                                                success: function(data) {
+                                                    alert(data);
+                                                },
+                                                error: function(err) {
+                                                    alert("" + err.message);
+                                                }
+                                            });
+                                        }
+                                    }
+                                },
+                                error: function(error) {
+                                    alert("Error" + " " + error.code + " " + error.message);
+                                }
+                            });
+                        },
+                        error: function(error) {
+                            alert(error.message);
+                        }
+                    });
+                }
+            }
+
+        </script>
+    </head>
+    <body>
+        <div>TestPage2</div>
+        <button onclick="Read_Friend()">Read Friend</button><br/>
+        <button onclick="CreateAddRequestto('123')">Add Friend</button><br/>
+        <button onclick="agreeAddRequestfrom('ztq')">Agree Friend</button><br/>
+        <!--        <button onclick="Show_Request_List()">Show Request List</button><br/>
+                <button onclick="Remove_Friend('С��123')">Remove Friend</button><br/>-->
+        <!--        
+        <button onclick="Remove_Friend('С��123')">Remove Friend</button><br/>
+                <button onclick="Add_Friend('С��123')">Add Friend</button><br/>
+        -->
+    </body>
+</html>
